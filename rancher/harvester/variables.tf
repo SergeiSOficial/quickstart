@@ -1,25 +1,13 @@
-# Variables for GCP infrastructure module
+# Variables for DO infrastructure module
 
-variable "gcp_account_json" {
+variable "kubeconfig_path" {
   type        = string
-  description = "File path and name of service account access token file."
+  description = "Kubeconfig file path to connect to the Harvester cluster"
 }
 
-variable "gcp_project" {
+variable "kubecontext" {
   type        = string
-  description = "GCP project in which the quickstart will be deployed."
-}
-
-variable "gcp_region" {
-  type        = string
-  description = "GCP region used for all resources."
-  default     = "us-east4"
-}
-
-variable "gcp_zone" {
-  type        = string
-  description = "GCP zone used for all resources."
-  default     = "us-east4-a"
+  description = "Name of the kubernetes context to use to the Harvester cluster"
 }
 
 variable "prefix" {
@@ -28,10 +16,15 @@ variable "prefix" {
   default     = "quickstart"
 }
 
-variable "machine_type" {
+variable "namespace" {
   type        = string
-  description = "Machine type used for all compute instances"
-  default     = "n1-standard-2"
+  description = "Harvester namespace to deploy the VMs into"
+  default     = "default"
+}
+
+variable "network_name" {
+  type        = string
+  description = "Name of the Harvester network to deploy the VMs into"
 }
 
 variable "rancher_kubernetes_version" {
@@ -58,20 +51,18 @@ variable "rancher_version" {
   default     = "2.7.1"
 }
 
-variable "rancher_helm_repository" {
-  type        = string
-  description = "The helm repository, where the Rancher helm chart is installed from"
-  default     = "https://releases.rancher.com/server-charts/latest"
-}
-
-# Required
 variable "rancher_server_admin_password" {
   type        = string
   description = "Admin password to use for Rancher server bootstrap, min. 12 characters"
 }
 
-
 # Local variables used to reduce repetition
 locals {
-  node_username = "gcpuser"
+  node_username = "ubuntu"
+  cluster_node_command = templatefile(
+    "${path.module}/files/userdata_quickstart_node.template",
+    {
+      register_command = module.rancher_common.custom_cluster_command
+    }
+  )
 }
